@@ -10,7 +10,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/pkg/sftp"
+	"github.com/pufferpanel/sftp"
 	"golang.org/x/crypto/ssh"
 )
 
