@@ -177,6 +177,8 @@ func (r *Request) call(handlers Handlers, pkt requestPacket) responsePacket {
 		return filecmd(handlers.FileCmd, r, pkt)
 	case "List", "Stat", "Readlink":
 		return filelist(handlers.FileList, r, pkt)
+	case "Opendir":
+		return folderopen(handlers.FolderOpen, r, pkt)
 	default:
 		return statusFromError(pkt,
 			errors.Errorf("unexpected method: %s", r.Method))
@@ -249,6 +251,11 @@ func filecmd(h FileCmder, r *Request, pkt requestPacket) responsePacket {
 		r.Attrs = p.Attrs.([]byte)
 	}
 	err := h.Filecmd(r)
+	return statusFromError(pkt, err)
+}
+
+func folderopen(h FolderOpen, r *Request, pkt requestPacket) responsePacket {
+	err := h.Folderopen(r)
 	return statusFromError(pkt, err)
 }
 
@@ -336,8 +343,10 @@ func requestMethod(p requestPacket) (method string) {
 		method = "Put"
 	case *sshFxpReaddirPacket:
 		method = "List"
-	case *sshFxpOpenPacket, *sshFxpOpendirPacket:
+	case *sshFxpOpenPacket:
 		method = "Open"
+	case *sshFxpOpendirPacket:
+		method = "Opendir"
 	case *sshFxpSetstatPacket, *sshFxpFsetstatPacket:
 		method = "Setstat"
 	case *sshFxpRenamePacket:

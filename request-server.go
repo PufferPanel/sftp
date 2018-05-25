@@ -15,12 +15,13 @@ import (
 
 var maxTxPacket uint32 = 1 << 15
 
-// Handlers contains the 4 SFTP server request handlers.
+// Handlers contains the 5 SFTP server request handlers.
 type Handlers struct {
 	FileGet  FileReader
 	FilePut  FileWriter
 	FileCmd  FileCmder
 	FileList FileLister
+	FolderOpen FolderOpen
 }
 
 // RequestServer abstracts the sftp protocol with an http request-like protocol
@@ -173,8 +174,13 @@ func (rs *RequestServer) packetWorker(
 			rpkt = cleanPacketPath(pkt)
 		case *sshFxpOpendirPacket:
 			request := requestFromPacket(ctx, pkt)
-			handle := rs.nextRequest(request)
-			rpkt = sshFxpHandlePacket{pkt.id(), handle}
+			p := request.call(rs.Handlers, pkt)
+			if !statusOk(p) {
+				rpkt = p
+			} else {
+				handle := rs.nextRequest(request)
+				rpkt = sshFxpHandlePacket{pkt.id(), handle}
+			}
 		case *sshFxpOpenPacket:
 			request := requestFromPacket(ctx, pkt)
 			handle := rs.nextRequest(request)

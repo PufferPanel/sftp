@@ -35,6 +35,10 @@ type FileLister interface {
 	Filelist(*Request) (ListerAt, error)
 }
 
+type FolderOpen interface {
+	Folderopen(*Request) error
+}
+
 // ListerAt does for file lists what io.ReaderAt does for files.
 // ListAt should return the number of entries copied and an io.EOF
 // error if at end of list. This is testable by comparing how many you

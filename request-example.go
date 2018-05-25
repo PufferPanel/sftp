@@ -21,7 +21,7 @@ func InMemHandler() Handlers {
 		files: make(map[string]*memFile),
 	}
 	root.memFile = newMemFile("/", true)
-	return Handlers{root, root, root, root}
+	return Handlers{root, root, root, root, nil}
 }
 
 // Example Handlers

@@ -240,11 +240,16 @@ func handlePacket(s *Server, p interface{}) error {
 			}},
 		})
 	case *sshFxpOpendirPacket:
-		return sshFxpOpenPacket{
-			ID:     p.ID,
-			Path:   p.Path,
-			Pflags: ssh_FXF_READ,
-		}.respond(s)
+		_, e := os.Stat(p.Path)
+		if e == nil {
+			return sshFxpOpenPacket{
+				ID:     p.ID,
+				Path:   p.Path,
+				Pflags: ssh_FXF_READ,
+			}.respond(s)
+		} else {
+			return s.sendError(p, syscall.ENOENT)
+		}
 	case *sshFxpReadPacket:
 		f, ok := s.getHandle(p.Handle)
 		if !ok {
